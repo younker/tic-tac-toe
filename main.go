@@ -2,6 +2,9 @@ package main
 
 import (
     "fmt"
+    "log"
+    "os"
+    "strconv"
     "strings"
     "time"
 
@@ -37,18 +40,41 @@ type move struct {
 func main() {
     start := time.Now()
 
-    // Placeholder: partially completed game with limited number of moves used
-    // for initial development. Board visual:
-    // x x o
-    // o x
-    board := [9]int{1, 1, -1, -1, 1, 1, 0, 0, -1}
+    // The board is represented by range -1...1. The state of the board is
+    // determined by the unnamed args passed in; the first 3 are the top row,
+    // the second set of 3 are the middle row and the final 3 are the bottom
+    // row. Example:
+    //   $ go run ./main.go 1 1 -1 -1 1 1 0 0 -1
+    // will translate to an array of ints like so:
+    //   [9]int{1, 1, -1, -1, 1, 1, 0, 0, -1}
+    // which translates to a tic-tac-toe board in the following state:
+    //   x x o
+    //   o x x
+    //       o
+    board := parseArgs(os.Args[1:])
 
     fmt.Printf("Initial Board State: %v\n", board)
     nextMove := getNextMove(board, Bot)
+    board[nextMove.index] = nextMove.player
     runtime := time.Since(start)
     fmt.Printf("Runtime: %v\n", runtime)
     fmt.Printf("Possible Outcomes: %v\n", outcomes)
     fmt.Printf("Move {player, index, score}: %v\n", nextMove)
+    fmt.Printf("Final Board State: %v\n", board)
+}
+
+func parseArgs(input []string) [9]int {
+    var board [9]int
+    for i, cell := range input {
+        n, err := strconv.Atoi(cell)
+        if err != nil {
+            log.Fatalf("cannot parse input: %s at position %d", cell, i)
+        }
+
+        board[i] = n
+    }
+
+    return board
 }
 
 var indent string
