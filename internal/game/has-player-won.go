@@ -1,4 +1,4 @@
-package util
+package game
 
 var winningCombinations = [8][3]int{
     {0, 1, 2}, // top row, straight across

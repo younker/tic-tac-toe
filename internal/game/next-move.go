@@ -1,14 +1,8 @@
-package main
+package game
 
 import (
     "fmt"
-    "log"
-    "os"
-    "strconv"
     "strings"
-    "time"
-
-    "github.com/younker/tic-tac-toe/util"
 )
 
 // The value assigned to each player; synonymous to `X` and `O`. Note that while
@@ -28,93 +22,53 @@ const (
     OpponentWins int = -10
 )
 
-// Counter tracking the total number of potential outcomes
-var outcomes uint16
-
 type move struct {
-    player int
-    index  int
-    score  int
-}
-
-func main() {
-    start := time.Now()
-
-    // The board is represented by range -1...1. The state of the board is
-    // determined by the unnamed args passed in; the first 3 are the top row,
-    // the second set of 3 are the middle row and the final 3 are the bottom
-    // row. Example:
-    //   $ go run ./main.go 1 1 -1 -1 1 1 0 0 -1
-    // will translate to an array of ints like so:
-    //   [9]int{1, 1, -1, -1, 1, 1, 0, 0, -1}
-    // which translates to a tic-tac-toe board in the following state:
-    //   x x o
-    //   o x x
-    //       o
-    board := parseArgs(os.Args[1:])
-
-    fmt.Printf("Initial Board State: %v\n", board)
-    nextMove := getNextMove(board, Bot)
-    board[nextMove.index] = nextMove.player
-    runtime := time.Since(start)
-    fmt.Printf("Runtime: %v\n", runtime)
-    fmt.Printf("Possible Outcomes: %v\n", outcomes)
-    fmt.Printf("Move {player, index, score}: %v\n", nextMove)
-    fmt.Printf("Final Board State: %v\n", board)
-}
-
-func parseArgs(input []string) [9]int {
-    var board [9]int
-    for i, cell := range input {
-        n, err := strconv.Atoi(cell)
-        if err != nil {
-            log.Fatalf("cannot parse input: %s at position %d", cell, i)
-        }
-
-        board[i] = n
-    }
-
-    return board
+    Player int
+    Index  int
+    Score  int
 }
 
 var indent string
 
-func getNextMove(board [9]int, player int) move {
+// Counter tracking the total number of potential outcomes
+var outcomes uint16
+
+func GetNextMove(board [9]int, player int) move {
     outcomes++
 
-    if util.HasPlayerWon(board, Opponent) {
+    if HasPlayerWon(board, Opponent) {
         fmt.Printf("%v! Game Over. Opponent wins\n", indent)
-        return move{score: OpponentWins}
+        return move{Score: OpponentWins}
     }
 
-    if util.HasPlayerWon(board, Bot) {
+    if HasPlayerWon(board, Bot) {
         fmt.Printf("%v! Game Over. Bot wins\n", indent)
-        return move{score: BotWins}
+        return move{Score: BotWins}
     }
 
-    emptyCells := util.IndicesOf(board, func(cell int) bool {
+    emptyCells := indicesOf(board, func(cell int) bool {
         return cell != Opponent && cell != Bot
     })
     if len(emptyCells) == 0 {
         fmt.Printf("%v! Game Over. Draw\n", indent)
-        return move{score: Draw}
+        return move{Score: Draw}
     }
     fmt.Printf("%v  emptyCells: %v\n", indent, emptyCells)
 
     var moves []move
     for _, emptyCell := range emptyCells {
-        m := move{index: emptyCell, player: player}
+        m := move{Index: emptyCell, Player: player}
         orig := board[emptyCell]
         board[emptyCell] = player
         indent += "  "
         fmt.Printf("%v+ move %v to cell %v\n", indent, player, emptyCell)
 
         if player == Bot {
-            worstMove := getNextMove(board, Opponent)
-            m.score = worstMove.score
+            worstMove := GetNextMove(board, Opponent)
+            m.Score = worstMove.Score
         } else {
-            bestMove := getNextMove(board, Bot)
-            m.score = bestMove.score
+            bestMove := GetNextMove(board, Bot)
+            m.Score = bestMove.Score
         }
 
         indent = strings.TrimSuffix(indent, "  ")
@@ -139,6 +93,16 @@ func getNextMove(board [9]int, player int) move {
     return nextMove
 }
 
+func indicesOf(board [9]int, fn func(int) bool) []int {
+    var spaces []int
+    for i, v := range board {
+        if fn(v) {
+            spaces = append(spaces, i)
+        }
+    }
+    return spaces
+}
+
 // Of all the possible moves, pick the (first) move with the highest score.
 // This is good enough for a first pass but present some problems. For
 // example, given the following board:
@@ -153,8 +117,8 @@ func pickBestMove(moves []move) move {
     var bestMove move
     highScore := -100
     for _, m := range moves {
-        if m.score > highScore {
-            highScore = m.score
+        if m.Score > highScore {
+            highScore = m.Score
             bestMove = m
         }
     }
@@ -165,8 +129,8 @@ func pickWorstMove(moves []move) move {
     var worstMove move
     lowScore := 100
     for _, m := range moves {
-        if m.score < lowScore {
-            lowScore = m.score
+        if m.Score < lowScore {
+            lowScore = m.Score
             worstMove = m
         }
     }
