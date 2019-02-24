@@ -1,1 +1,4 @@
+.DS_Store
 .gometalinter-*
+cmd/server/main
+cmd/server/main.zip
