@@ -47,7 +47,13 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
         return events.APIGatewayProxyResponse{}, err
     }
 
+    // Quick fix to allow CORS
+    headers := map[string]string{
+        "Access-Control-Allow-Origin": "*",
+    }
+
     return events.APIGatewayProxyResponse{
+        Headers:    headers,
         StatusCode: 200,
         Body:       string(resp),
     }, nil
