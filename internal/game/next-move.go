@@ -1,7 +1,6 @@
 package game
 
 import (
-    "fmt"
     "strings"
 )
 
@@ -37,12 +36,10 @@ func GetNextMove(board [9]int, player int) move {
     outcomes++
 
     if HasPlayerWon(board, Opponent) {
-        fmt.Printf("%v! Game Over. Opponent wins\n", indent)
         return move{Score: OpponentWins}
     }
 
     if HasPlayerWon(board, Bot) {
-        fmt.Printf("%v! Game Over. Bot wins\n", indent)
         return move{Score: BotWins}
     }
 
@@ -50,10 +47,8 @@ func GetNextMove(board [9]int, player int) move {
         return cell != Opponent && cell != Bot
     })
     if len(emptyCells) == 0 {
-        fmt.Printf("%v! Game Over. Draw\n", indent)
         return move{Score: Draw}
     }
-    fmt.Printf("%v  emptyCells: %v\n", indent, emptyCells)
 
     var moves []move
     for _, emptyCell := range emptyCells {
@@ -61,7 +56,6 @@ func GetNextMove(board [9]int, player int) move {
         orig := board[emptyCell]
         board[emptyCell] = player
         indent += "  "
-        fmt.Printf("%v+ move %v to cell %v\n", indent, player, emptyCell)
 
         if player == Bot {
             worstMove := GetNextMove(board, Opponent)
@@ -75,7 +69,6 @@ func GetNextMove(board [9]int, player int) move {
         board[emptyCell] = orig
         moves = append(moves, m)
     }
-    fmt.Printf("%v  moves: %v\n", indent, moves)
 
     // The player we want to win is known as the the "maximizing player". In our
     // case, the Bot is our selected champion so our next move needs to have the
@@ -89,7 +82,6 @@ func GetNextMove(board [9]int, player int) move {
         nextMove = pickWorstMove(moves)
     }
 
-    fmt.Printf("%v  next move: %v\n", indent, nextMove)
     return nextMove
 }
 
