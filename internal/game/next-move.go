@@ -9,9 +9,9 @@ import (
 // these values are (signed) ints, they do not have any impact on outcome
 // calculations
 const (
-    Bot      int = 1
     Empty    int = 0
-    Opponent int = -1
+    Opponent int = 1
+    Bot      int = 2
 )
 
 // Used for calculating desired outcomes (aka best move) with the presumptive
