@@ -13,14 +13,10 @@ import (
 func main() {
     start := time.Now()
 
-    board := parseArgs(os.Args[1:])
+    maxPlayer, minPlayer := getPlayers(os.Args[1])
+    board := getBoard(os.Args[2:])
 
-    // TODO: [jason@] introduce more sophisticated args parsing so that we can
-    // have flags to modify output (ie debug). For now, this will work.
-    // debug := false
-
-    fmt.Printf("Initial Board State: %v\n", board)
-    nextMove := game.GetNextMove(board, game.Bot)
+    nextMove := game.GetNextMove(board, maxPlayer, minPlayer, maxPlayer)
     board[nextMove.Index] = nextMove.Player
     runtime := time.Since(start)
     fmt.Printf("Runtime: %v\n", runtime)
@@ -28,7 +24,21 @@ func main() {
     fmt.Printf("Final Board State: %v\n", board)
 }
 
-func parseArgs(input []string) [9]int {
+func getPlayers(input string) (int, int) {
+    currPlayer, err := strconv.Atoi(input)
+    if err != nil {
+        log.Fatalf("cannot parse player: %s at position %d", os.Args[1], 1)
+    }
+
+    opponent := game.PlayerTwo
+    if currPlayer == opponent {
+        opponent = game.PlayerOne
+    }
+
+    return currPlayer, opponent
+}
+
+func getBoard(input []string) [9]int {
     var board [9]int
     for i, cell := range input {
         n, err := strconv.Atoi(cell)

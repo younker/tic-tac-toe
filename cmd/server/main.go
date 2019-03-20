@@ -9,7 +9,8 @@ import (
 )
 
 type RequestBody struct {
-    Board [9]int `json:"board"`
+    Player int    `json:"player"`
+    Board  [9]int `json:"board"`
 }
 
 func main() {
@@ -37,8 +38,14 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
         return events.APIGatewayProxyResponse{}, err
     }
 
-    m := game.GetNextMove(body.Board, game.Bot)
-    body.Board[m.Index] = m.Player
+    maxPlayer := body.Player
+    minPlayer := game.PlayerTwo
+    if maxPlayer == minPlayer {
+        minPlayer = game.PlayerOne
+    }
+
+    nextMove := game.GetNextMove(body.Board, maxPlayer, minPlayer, maxPlayer)
+    body.Board[nextMove.Index] = nextMove.Player
 
     // Again, the events api will assume nothing for us so we need to convert
     // our RequestBody to JSON

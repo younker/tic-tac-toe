@@ -8,17 +8,17 @@ import (
 // these values are (signed) ints, they do not have any impact on outcome
 // calculations
 const (
-    Empty    int = 0
-    Opponent int = 1
-    Bot      int = 2
+    Empty     int = 0
+    PlayerOne int = 1
+    PlayerTwo int = 2
 )
 
-// Used for calculating desired outcomes (aka best move) with the presumptive
-// goal being a Bot victory or, worst case, draw.
+// Used for calculating the desired outcome with the goal being a maxPlayer
+// victory or, worst case, draw.
 const (
-    BotWins      int = 10
-    Draw         int = 0
-    OpponentWins int = -10
+    maxPlayerWins int = 10
+    Draw          int = 0
+    minPlayerWins int = -10
 )
 
 type move struct {
@@ -32,19 +32,19 @@ var indent string
 // Counter tracking the total number of potential outcomes
 var outcomes uint16
 
-func GetNextMove(board [9]int, player int) move {
+func GetNextMove(board [9]int, maxPlayer int, minPlayer, currPlayer int) move {
     outcomes++
 
-    if HasPlayerWon(board, Opponent) {
-        return move{Score: OpponentWins}
+    if HasPlayerWon(board, minPlayer) {
+        return move{Score: minPlayerWins}
     }
 
-    if HasPlayerWon(board, Bot) {
-        return move{Score: BotWins}
+    if HasPlayerWon(board, maxPlayer) {
+        return move{Score: maxPlayerWins}
     }
 
     emptyCells := indicesOf(board, func(cell int) bool {
-        return cell != Opponent && cell != Bot
+        return cell == Empty
     })
     if len(emptyCells) == 0 {
         return move{Score: Draw}
@@ -52,16 +52,16 @@ func GetNextMove(board [9]int, player int) move {
 
     var moves []move
     for _, emptyCell := range emptyCells {
-        m := move{Index: emptyCell, Player: player}
+        m := move{Index: emptyCell, Player: currPlayer}
         orig := board[emptyCell]
-        board[emptyCell] = player
+        board[emptyCell] = currPlayer
         indent += "  "
 
-        if player == Bot {
-            worstMove := GetNextMove(board, Opponent)
+        if currPlayer == maxPlayer {
+            worstMove := GetNextMove(board, maxPlayer, minPlayer, minPlayer)
             m.Score = worstMove.Score
         } else {
-            bestMove := GetNextMove(board, Bot)
+            bestMove := GetNextMove(board, maxPlayer, minPlayer, maxPlayer)
             m.Score = bestMove.Score
         }
 
@@ -70,13 +70,13 @@ func GetNextMove(board [9]int, player int) move {
         moves = append(moves, m)
     }
 
-    // The player we want to win is known as the the "maximizing player". In our
-    // case, the Bot is our selected champion so our next move needs to have the
+    // The player we want to win is known as the the "maximizing player". Below,
+    // when the maxPlayer is the current player, our next move needs to have the
     // highest chance (score) of success. Conversely, if we are calculating the
     // next move for our opponent, or the minimzing player, then we will want to
-    // select the minimum score.
+    // select the move with the lowest change (score) of success.
     var nextMove move
-    if player == Bot {
+    if currPlayer == maxPlayer {
         nextMove = pickBestMove(moves)
     } else {
         nextMove = pickWorstMove(moves)
@@ -102,7 +102,7 @@ func indicesOf(board [9]int, fn func(int) bool) []int {
 // This algorithm will select the following end-of-game sequence:
 //   {1,5}, {-1,7}, {1,8}
 //   {1,5}, {-1,8}, {1,7}
-// Both result in the Bot winning but really, the only move we needed to make
+// Both result in the maxPlayer win but really, the only move we needed to make
 // was {1,7}. To solve this we could factor in the number of steps required to
 // win scoring quicker wins higher rather than selecting the first "best move".
 func pickBestMove(moves []move) move {
