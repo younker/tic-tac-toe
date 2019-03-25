@@ -98,12 +98,12 @@ func indicesOf(board [9]int, fn func(int) bool) []int {
 // Of all the possible moves, pick the (first) move with the highest score.
 // This is good enough for a first pass but present some problems. For
 // example, given the following board:
-//   {1, 1, -1, -1, 1, 1, 0, 0, -1}
+//   {2, 2, 1, 1, 2, 2, 0, 0, 1}
 // This algorithm will select the following end-of-game sequence:
-//   {1,5}, {-1,7}, {1,8}
-//   {1,5}, {-1,8}, {1,7}
+//   {2,5}, {1,7}, {2,8}
+//   {2,5}, {1,8}, {2,7}
 // Both result in the maxPlayer win but really, the only move we needed to make
-// was {1,7}. To solve this we could factor in the number of steps required to
+// was {2,7}. To solve this we could factor in the number of steps required to
 // win scoring quicker wins higher rather than selecting the first "best move".
 func pickBestMove(moves []move) move {
     var bestMove move

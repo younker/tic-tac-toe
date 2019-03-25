@@ -19,11 +19,12 @@ $ go run cmd/cli/main.go 2 1 1 2 2 2 1 1 0 0
 2. `server`: a compressed binary deployed to aws lambda (using [scripts/deploy.sh](src/github.com/younker/tic-tac-toe/scripts/deploy.sh)) where it is available via HTTP:
 
 ```bash
-$ curl https://vpppfv00l4.execute-api.us-east-1.amazonaws.com/prod/get-move -X POST -d '{"player": 1, board":[1, 1, -1, 1, 1, 1, 0, 0, -1 ]}'
+$ curl https://vpppfv00l4.execute-api.us-east-1.amazonaws.com/prod/get-move -X POST -d '{"player": 2, board":[0, 0, 1, 1, 2, 2, 0, 0, 1]}'
 HTTP/2 200
 
 {
-  "board": [ 1, 1, -1, -1, 1, 1, 0, 1, -1 ]
+  "player": 2,
+  "board": [2, 0, 1, 1, 2, 2, 0, 0, 1]
 }
 ```
 
