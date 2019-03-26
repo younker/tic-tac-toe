@@ -56,7 +56,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
     // Quick fix to allow CORS
     headers := map[string]string{
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "http://ynkr.org",
     }
 
     return events.APIGatewayProxyResponse{
